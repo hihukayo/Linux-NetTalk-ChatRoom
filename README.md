@@ -231,13 +231,17 @@ payload = TYPE|arg1|arg2|...
 
 ## 截图
 
-| 登录界面 | 聊天界面 |
+| 登入界面 | 聊天页面 |
 | :---: | :---: |
-| ![登录](screenshots/login.png) | ![聊天](screenshots/chat.png) |
+| ![登入界面](screenshots/登入界面.png) | ![聊天页面](screenshots/聊天页面.png) |
 
-| 私聊弹窗 | 表情面板 | @ 提及 |
+| 表情面板 | @ 用户 | 服务端运行 |
 | :---: | :---: | :---: |
-| ![私聊](screenshots/private.png) | ![表情](screenshots/emoji.png) | ![提及](screenshots/at.png) |
+| ![表情面板](screenshots/emoji.png) | ![@用户](screenshots/@用户.png) | ![服务端运行](screenshots/服务端运行.png) |
+
+| 运行效果总览 |
+| :---: |
+| ![运行效果截图](screenshots/运行效果截图.png) |
 
 ---
 
