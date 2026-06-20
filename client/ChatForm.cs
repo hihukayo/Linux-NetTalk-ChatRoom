@@ -367,7 +367,7 @@ public class ChatForm : Form
             "🧊");
 
 
-        // ====== @ M-gM-^TM-(M-fM-^HM-7M-eM-<M-9M-eM-^GM-:M-eM-^HM-^WM-hM-!M-( ======
+        // @ 用户
         _atContainer = new Panel
         {
             Size = new Size(180, 220),
@@ -389,46 +389,47 @@ public class ChatForm : Form
         var atClose = new Button
         {
             Text = "✕",
-            Size = new Size(18, 18),
+            Size = new Size(18, 30),
             Location = new Point(_atContainer.Width - 22, 4),
             FlatStyle = FlatStyle.Flat,
             FlatAppearance = { BorderSize = 0 },
-            Font = new Font("微软雅黑", 8, FontStyle.Bold),
-            ForeColor = Color.FromArgb(200, 40, 40),
+            Font = new Font("微软雅黑", 9, FontStyle.Bold),
+            ForeColor = Color.FromArgb(220, 50, 50),
             BackColor = Color.White,
             Cursor = Cursors.Hand,
-            TabStop = false
+            TabStop = false,
+            Padding = new Padding(0),
+            Margin = new Padding(0)
         };
+        atClose.MouseEnter += (s, e) => atClose.BackColor = Color.FromArgb(255, 235, 235);
+        atClose.MouseLeave += (s, e) => atClose.BackColor = Color.White;
         atClose.Click += (s, e) => _atContainer.Visible = false;
         _atContainer.Controls.Add(atClose);
+        atClose.BringToFront();
 
         var atSep = new Label
         {
             Width = _atContainer.Width - 10,
             Height = 1,
             BackColor = Color.FromArgb(220, 220, 220),
-            Location = new Point(5, 26)
+            Location = new Point(5, 38)
         };
         _atContainer.Controls.Add(atSep);
 
         _atListBox = new ListBox
         {
-            Location = new Point(5, 29),
-            Size = new Size(_atContainer.Width - 10, _atContainer.Height - 33),
+            Location = new Point(5, 41),
+            Size = new Size(_atContainer.Width - 10, _atContainer.Height - 45),
             BorderStyle = BorderStyle.None,
-            Font = new Font("M-hM-^AM-^EM-^HM-^YM-^HM-^IM-^M-^BM-^AM-^L", 12),
+            Font = new Font("微软雅黑", 12),
             BackColor = Color.White,
             ForeColor = Color.FromArgb(51, 51, 51)
         };
-        _atListBox.Click += (s, e) =>
+        _atListBox.MouseClick += (s, e) =>
         {
-            if (_atListBox.SelectedItem != null)
-                InsertAtUser(_atListBox.SelectedItem.ToString()!);
-        };
-        _atListBox.DoubleClick += (s, e) =>
-        {
-            if (_atListBox.SelectedItem != null)
-                InsertAtUser(_atListBox.SelectedItem.ToString()!);
+            int idx = _atListBox.IndexFromPoint(e.Location);
+            if (idx >= 0)
+                InsertAtUser(_atListBox.Items[idx].ToString()!);
         };
         _atListBox.KeyDown += (s, e) =>
         {
@@ -443,7 +444,6 @@ public class ChatForm : Form
         _atContainer.BringToFront();
 
         _inputBox.TextChanged += (s, e) => CheckAtMention();
-        _inputBox.LostFocus += (s, e) => _atContainer.Visible = false;
 
         _client.OnMessageReceived += OnMessage;
         _client.OnDisconnected += OnDisconnected;
@@ -617,7 +617,7 @@ public class ChatForm : Form
         _atContainer.Location = new Point(panelX, panelY);
         _atContainer.Visible = true;
         _atContainer.BringToFront();
-        _atListBox.SelectedIndex = 0;
+        _atListBox.SelectedIndex = -1;
     }
 
     // 插入 @用户 到输入框
@@ -707,11 +707,17 @@ public class ChatForm : Form
                         bool isMe = msg.Args[0] == _username;
                         AppendBubble(msg.Args[0], msg.Args[1], isMe);
                         if (!isMe)
-                        {
                             SaveToLog($"{msg.Args[0]}: {msg.Args[1]}");
-                            // 被 @ 提醒
-                            if (msg.Args[1].Contains($"@{_username}", StringComparison.OrdinalIgnoreCase))
+
+                        // @ 提醒（包括 @自己和别人 @你）
+                        if (msg.Args[1].Contains($"@{_username}", StringComparison.OrdinalIgnoreCase))
+                        {
+                            var atBlue = Color.FromArgb(30, 120, 220);
+                            if (isMe)
+                                AppendCentered($"💬 你 @了 自己", atBlue);
+                            else
                             {
+                                AppendCentered($"💬 {msg.Args[0]} @了你", atBlue);
                                 Text = $"💬 有人@你 - {_username}";
                                 TopMost = true;
                                 TopMost = false;
