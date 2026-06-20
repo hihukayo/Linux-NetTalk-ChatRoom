@@ -122,10 +122,9 @@ public class ChatForm : Form
             Dock = DockStyle.Fill,
             ReadOnly = true,
             BackColor = Color.FromArgb(245, 245, 245),
-            Font = new Font("黑体", 10),
+            Font = new Font("微软雅黑", 10),
             BorderStyle = BorderStyle.None,
-            DetectUrls = false,
-            LanguageOption = RichTextBoxLanguageOptions.UIFonts
+            DetectUrls = false
         };
         mainPanel.Controls.Add(_messageBox);
 
@@ -249,8 +248,8 @@ public class ChatForm : Form
         var closeBtn = new Button
         {
             Text = "✕",
-            Size = new Size(24, 24),
-            Location = new Point(_emojiContainer.Width - 30, 4),
+            Size = new Size(18, 18),
+            Location = new Point(_emojiContainer.Width - 24, 5),
             FlatStyle = FlatStyle.Flat,
             FlatAppearance = { BorderSize = 0 },
             Font = new Font("微软雅黑", 10, FontStyle.Bold),
@@ -624,11 +623,18 @@ public class ChatForm : Form
         _messageBox.SelectionColor = Color.Gray;
         _messageBox.SelectionFont = new Font("微软雅黑", 10);
 
-        // 内容
-        int contentStart = timeStart + time.Length + 1;
-        _messageBox.Select(contentStart, content.Length);
-        _messageBox.SelectionColor = contentColor ?? Color.FromArgb(51, 51, 51);
-        _messageBox.SelectionFont = new Font("微软雅黑", 12);
+        // 内容（用默认字体，系统自动回退渲染 Emoji）
+        try
+        {
+            int contentStart = timeStart + time.Length + 1;
+            _messageBox.Select(contentStart, content.Length);
+            _messageBox.SelectionColor = contentColor ?? Color.FromArgb(51, 51, 51);
+            _messageBox.SelectionFont = new Font("微软雅黑", 12);
+        }
+        catch (Exception ex)
+        {
+            try { File.AppendAllText("crash.log", $"[{DateTime.Now}] AppendBubble: {ex.Message}\n"); } catch { }
+        }
 
         _messageBox.SelectionStart = _messageBox.TextLength;
         _messageBox.ScrollToCaret();
@@ -665,15 +671,22 @@ public class ChatForm : Form
     // ==========================================================
     private void AppendCentered(string text, Color color)
     {
-        int start = _messageBox.TextLength;
-        string time = DateTime.Now.ToString("HH:mm:ss");
-        string line = $"{text}  {time}\n";
-        _messageBox.AppendText(line);
-        _messageBox.Select(start, line.Length);
-        _messageBox.SelectionColor = color;
-        _messageBox.SelectionFont = new Font("微软雅黑", 10);
-        _messageBox.SelectionStart = _messageBox.TextLength;
-        try { _messageBox.ScrollToCaret(); } catch { }
+        try
+        {
+            int start = _messageBox.TextLength;
+            string time = DateTime.Now.ToString("HH:mm:ss");
+            string line = $"{text}  {time}\n";
+            _messageBox.AppendText(line);
+            _messageBox.Select(start, line.Length);
+            _messageBox.SelectionColor = color;
+            _messageBox.SelectionStart = _messageBox.TextLength;
+            try { _messageBox.ScrollToCaret(); } catch { }
+        }
+        catch (Exception ex)
+        {
+            // 防止 Emoji 等字符渲染异常导致消息被吞
+            try { File.AppendAllText("crash.log", $"[{DateTime.Now}] AppendCentered: {ex.Message}\n"); } catch { }
+        }
     }
 
     // ==========================================================
