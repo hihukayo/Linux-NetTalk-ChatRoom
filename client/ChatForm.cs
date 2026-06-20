@@ -168,7 +168,7 @@ public class ChatForm : Form
 
         var hintLabel = new Label
         {
-            Text = "💡 /w 用户名 消息 → 私聊　　/emoji 名称 → 发表情",
+            Text = "💡 /w 用户名 消息 → 私聊　　/emoji 名称 → 发表情　　@ → @用户",
             ForeColor = Color.Gray,
             Font = new Font("微软雅黑", 8),
             Location = new Point(5, inputH + 3),
@@ -423,7 +423,18 @@ public class ChatForm : Form
             BorderStyle = BorderStyle.None,
             Font = new Font("微软雅黑", 12),
             BackColor = Color.White,
-            ForeColor = Color.FromArgb(51, 51, 51)
+            DrawMode = DrawMode.OwnerDrawFixed,
+            ItemHeight = 26
+        };
+        _atListBox.DrawItem += (s, e) =>
+        {
+            e.DrawBackground();
+            if (e.Index < 0) return;
+            string name = _atListBox.Items[e.Index].ToString() ?? "";
+            Color fore = name == _username ? Color.FromArgb(7, 193, 96) : Color.FromArgb(80, 80, 80);
+            using var brush = new SolidBrush(fore);
+            e.Graphics.DrawString(name, e.Font, brush, e.Bounds.Left + 4, e.Bounds.Top + 3);
+            e.DrawFocusRectangle();
         };
         _atListBox.MouseClick += (s, e) =>
         {
@@ -802,17 +813,22 @@ public class ChatForm : Form
         string time = DateTime.Now.ToString("HH:mm:ss");
         Color userColor = isMe ? Color.FromArgb(7, 193, 96) : Color.FromArgb(51, 51, 51);
 
-        string line = $"{sender}  {time}\n{content}\n\n";
+        // 上文如果是系统消息（只有\n），加空行隔开
+        string prefix = "";
+        if (_messageBox.TextLength > 0 && _messageBox.Text.EndsWith('\n') && !_messageBox.Text.EndsWith("\n\n"))
+            prefix = "\n";
+        string line = prefix + $"{sender}  {time}\n{content}\n\n";
         int start = _messageBox.TextLength;
+        int off = prefix.Length; // 偏移量
         _messageBox.AppendText(line);
 
         // 用户名：绿色/深色
-        _messageBox.Select(start, sender.Length);
+        _messageBox.Select(start + off, sender.Length);
         _messageBox.SelectionColor = userColor;
         _messageBox.SelectionFont = new Font("黑体", 14, FontStyle.Bold);
 
         // 时间：灰色
-        int timeStart = start + sender.Length + 2;
+        int timeStart = start + off + sender.Length + 2;
         _messageBox.Select(timeStart, time.Length);
         _messageBox.SelectionColor = Color.Gray;
         _messageBox.SelectionFont = new Font("微软雅黑", 10);
@@ -820,7 +836,7 @@ public class ChatForm : Form
         // 内容（@用户名 显示为蓝色）
         try
         {
-            int contentStart = timeStart + time.Length + 1;
+            int contentStart = start + off + sender.Length + 2 + time.Length + 1;
             AppendColoredText(content, contentStart, contentColor ?? Color.FromArgb(51, 51, 51));
         }
         catch (Exception ex)

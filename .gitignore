@@ -1,24 +1,53 @@
-# Visual Studio 临时文件
+# ============================================
+# NetTalk — .gitignore
+# ============================================
+
+# ===================
+# Visual Studio / IDE
+# ===================
 .vs/
+.vscode/
+.idea/
 *.suo
 *.user
 *.userosscache
 *.sln.docstates
+[Dd]ebug/
+[Rr]elease/
+[Dd]ebugPublic/
+[Rr]eleases/
+x64/
+x86/
 
-# 编译输出
-bin/
-obj/
+# ===================
+# .NET 编译输出
+# ===================
+client/bin/
+client/obj/
 *.exe
 *.pdb
 *.dll
+*.exe.config
+*.nupkg
 
-# 项目构建文件
-.vs/
+# ===================
+# C++ 编译输出
+# ===================
+server/chat_server
+server/*.o
 
+# ===================
 # 日志 / 运行记录
+# ===================
 *.log
 crash.log
+聊天记录_*.txt
 
-# IDE
-.idea/
+# ===================
+# 系统文件
+# ===================
 *.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
